@@ -1,0 +1,55 @@
+{
+  "name": "unmark-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Privacy-first watermark and metadata remover. Everything runs locally.",
+  "license": "MIT",
+  "author": "Dhirender Choudhary",
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/**\" build",
+    "dev": "pnpm --filter @unmarkk/web dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "typecheck": "pnpm -r --filter \"./packages/**\" typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test",
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo coverage",
+    "rename": "node scripts/rename-scope.mjs",
+    "version:set": "node scripts/set-version.mjs",
+    "skills:install": "node scripts/install-skills.mjs",
+    "release:dry": "pnpm publish -r --dry-run --access public --filter '!@unmarkk/web'"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vitest": "^2.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dhirenderchoudhary/unmarkk.git"
+  },
+  "homepage": "https://github.com/Dhirenderchoudhary/unmarkk#readme",
+  "bugs": {
+    "url": "https://github.com/Dhirenderchoudhary/unmarkk/issues"
+  }
+}
