@@ -1,0 +1,102 @@
+# Changelog
+
+Notable changes, newest first. This project follows [semantic versioning](https://semver.org).
+
+## 1.0.0
+
+First release.
+
+### The engine — `@unmarkk/core`
+
+Zero dependencies, no I/O capability, the same code in Node and the browser.
+
+- **Invisible-character pass** with context-aware preservation of the invisibles
+  that carry meaning: emoji joiners, script joiners in Persian and Devanagari,
+  flag tag characters, Mongolian free variation selectors, Khmer inherent
+  vowels, Hangul jamo fillers, and orthographic Arabic and Syriac format marks.
+  The same codepoint floating free is removed.
+- **Byte-exact text codec.** Undecodable bytes are escaped rather than replaced,
+  so cleaning a Latin-1 or Shift-JIS document does not corrupt every non-ASCII
+  byte in it.
+- **PNG, JPEG and WebP** parsers with a real EXIF/TIFF directory walker,
+  including the embedded thumbnail directory. Tags are numeric, so a string scan
+  finds nothing in them — without the walker a phone photo reports as carrying
+  no identifying metadata while holding the coordinates of the room it was taken
+  in.
+- **PDF, DOCX, ODT, SVG, HTML and Markdown** handling.
+- **Isomorphic ZIP** reader and writer built on the platform's own compression
+  streams, preserving entry order and per-entry compression method — ODT is only
+  valid if `mimetype` is first and stored uncompressed.
+- **Aggregate auditing**: normalised per-file rows, confidence buckets, exposure
+  counts, and worst-first ranking, shared by the directory and website audits.
+- **Rewrite support**: prompt templates, bigram-Jaccard divergence scoring, and
+  an assessment written so it cannot overstate what a rewrite achieved.
+- **Stylometry scorer**, reported as informational and off by default.
+
+### The command line — `@unmarkk/cli`
+
+`inspect`, `clean`, `scan`, `audit-site`, `rewrite` and `backends`, with atomic
+symlink-safe writes and pipeline-friendly exit codes.
+
+- `scan` ranks a directory tree worst-first and reports exposure categories
+  rather than only counts.
+- `audit-site` fetches the URLs in a sitemap. It is the only command that opens
+  a socket, and it refuses private, loopback and link-local addresses —
+  including literal-IP URLs, which skip DNS resolution entirely and would
+  otherwise walk straight past a lookup-only guard.
+- `rewrite` defaults to printing a prompt and contacting nothing. Live backends
+  are loopback-only unless explicitly overridden, API keys come from the
+  environment rather than argv, and redirects are refused so an `Authorization`
+  header cannot be forwarded to an unvalidated host.
+- `backends` reports which optional external engines are actually installed and
+  usable, rather than what is theoretically supported.
+
+### The service — `@unmarkk/server`
+
+Local HTTP API on `node:http` with no framework. Loopback by default, request
+bodies held in memory and never written to disk, no filename or content in the
+logs, and a generated OpenAPI 3.1 document.
+
+### The browser app
+
+Two panels: a file queue, and a text inspector that renders every invisible
+character inline as a visible chip, so you can see where they sit instead of
+being told a count. Processing runs in a Web Worker, and `connect-src 'none'`
+means the browser refuses any upload the page could attempt.
+
+### Agent skills
+
+`unmark-files` and `unmark-text`, plus a Cursor rule and a snippet for project
+instruction files. Code-free by design: they describe the CLI rather than
+shipping scripts that drift out of step with it.
+
+### Design decisions worth recording
+
+- **PDF is rebuilt, not edited.** `exiftool -all=` writes an incremental update:
+  it drops `/Info` from the trailer, but the original bytes stay in the file and
+  can be restored with `-PDF-update:all=`. Re-serialising from the object graph
+  means removed data is absent from the output. Object streams are expanded
+  first, because in PDF 1.5+ the Info dictionary usually lives compressed inside
+  one.
+- **Confidence is assigned where a finding is emitted**, never inferred later
+  from how it was worded.
+- **Identifying metadata is reported separately from AI provenance.** GPS,
+  camera serials, author names and timestamps get first-class treatment rather
+  than being incidental to a provenance scan.
+- **JPEG keeps APP0 and APP14.** Both change how the image decodes; without
+  APP14, CMYK and YCCK files render with wrong or inverted colours.
+- **DOCX and WebP cleaning repair their own references.** Dropped parts have
+  their `[Content_Types].xml` overrides and `_rels` entries removed, and removed
+  WebP chunks have their `VP8X` feature flags cleared. Without that, strict
+  readers reject the result and Word offers to repair the file.
+- **Malformed containers are refused rather than rewritten**, so bytes the
+  parser could not account for are never silently dropped.
+- **Body text is never treated as metadata.** A document that discusses a model
+  is a document about that model.
+
+### Out of scope, deliberately
+
+Pixel-domain and audio watermark removal, and statistical text watermark
+removal. Neither can be done by editing bytes, and both are documented as limits
+rather than gestured at. Optional external backends exist for the pixel case;
+none ship with the tool.
