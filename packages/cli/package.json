@@ -1,0 +1,47 @@
+{
+  "name": "@unmarkk/cli",
+  "version": "1.0.0",
+  "description": "Command-line privacy-first watermark and metadata remover. Runs entirely on your machine.",
+  "license": "MIT",
+  "author": "Dhirender Choudhary",
+  "type": "module",
+  "bin": {
+    "unmark": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/.tsbuildinfo",
+    "README.md"
+  ],
+  "keywords": [
+    "cli",
+    "privacy",
+    "metadata",
+    "exif",
+    "watermark",
+    "c2pa",
+    "local-first"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@unmarkk/core": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dhirenderchoudhary/unmarkk.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/Dhirenderchoudhary/unmarkk#readme",
+  "bugs": {
+    "url": "https://github.com/Dhirenderchoudhary/unmarkk/issues"
+  }
+}
