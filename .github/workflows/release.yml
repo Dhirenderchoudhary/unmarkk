@@ -99,6 +99,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
 
+      # A missing token surfaces as a bare ENEEDAUTH from deep inside pnpm.
+      # Checking first turns that into a sentence that says what to do.
+      - name: Require an npm token
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN is not set. Create an npm automation token" \
+              "(npmjs.com -> Access Tokens -> Generate -> Automation) and add it" \
+              "under Settings -> Secrets and variables -> Actions as NPM_TOKEN."
+            exit 1
+          fi
+
       # Order matters: cli and server depend on core, so core must be on the
       # registry first. pnpm resolves that itself with a recursive publish, and
       # rewrites the workspace:* ranges to real versions on the way out.
@@ -113,6 +124,9 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    # Deploying the site is a convenience. If Pages is not configured, say so
+    # without failing a release whose packages are already on the registry.
+    continue-on-error: true
     permissions:
       contents: read
       pages: write
@@ -133,9 +147,16 @@ jobs:
       - run: pnpm --filter @unmarkk/core build
       - run: pnpm --filter @unmarkk/web build
 
+      # `enablement` switches Pages on when the repository has never had it
+      # configured. Without it the action fails with a bare "Not Found", which
+      # is an unhelpful way to say "tick a box in Settings".
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: packages/web/dist
+
       - id: deploy
         uses: actions/deploy-pages@v4
