@@ -31,6 +31,15 @@ works — which is a reasonable thing to want from a tool like this.
 
 ### GitHub Pages
 
+Two steps, because a workflow cannot detect whether Pages is enabled and a job
+that always ran would fail every release until somebody ticked the box:
+
+1. Settings → Pages → Source → **GitHub Actions**
+2. Settings → Secrets and variables → Actions → **Variables** → new repository
+   variable `DEPLOY_PAGES` = `true`
+
+Until that variable is set the deploy job is skipped, not failed.
+
 Already wired up in
 [`.github/workflows/release.yml`](.github/workflows/release.yml). Enable it
 once:

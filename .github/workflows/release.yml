@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      can_publish: ${{ steps.targets.outputs.can_publish }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +35,22 @@ jobs:
       - name: Read the version
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Publishing and deploying are optional. Report whether each is set up so
+      # the dependent jobs can skip rather than fail — a tag should not show a
+      # permanent red cross because a target nobody configured is unreachable.
+      - name: Which release targets are configured
+        id: targets
+        run: |
+          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "can_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_publish=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping the npm publish: no NPM_TOKEN secret." \
+              "Add an npm automation token under Settings -> Secrets and variables" \
+              "-> Actions to publish automatically, or publish by hand with" \
+              "pnpm publish -r --access public --filter '!@unmarkk/web'."
+          fi
 
       # Tagging v1.0.1 and shipping 1.0.0 is the classic release mistake, and
       # npm versions cannot be replaced. Catch it before anything is published.
@@ -76,7 +93,10 @@ jobs:
     name: publish to npm
     needs: verify
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && inputs.dry_run != true
+    if: |
+      startsWith(github.ref, 'refs/tags/')
+      && inputs.dry_run != true
+      && needs.verify.outputs.can_publish == 'true'
     environment: release
     permissions:
       contents: read
@@ -99,17 +119,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
 
-      # A missing token surfaces as a bare ENEEDAUTH from deep inside pnpm.
-      # Checking first turns that into a sentence that says what to do.
-      - name: Require an npm token
-        run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "::error::NPM_TOKEN is not set. Create an npm automation token" \
-              "(npmjs.com -> Access Tokens -> Generate -> Automation) and add it" \
-              "under Settings -> Secrets and variables -> Actions as NPM_TOKEN."
-            exit 1
-          fi
-
       # Order matters: cli and server depend on core, so core must be on the
       # registry first. pnpm resolves that itself with a recursive publish, and
       # rewrites the workspace:* ranges to real versions on the way out.
@@ -123,10 +132,11 @@ jobs:
     name: deploy the web app
     needs: verify
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    # Deploying the site is a convenience. If Pages is not configured, say so
-    # without failing a release whose packages are already on the registry.
-    continue-on-error: true
+    # Opt in by setting the repository variable DEPLOY_PAGES to "true" once
+    # Settings -> Pages -> Source is set to GitHub Actions. Whether Pages is
+    # enabled cannot be detected from inside a workflow, and a job that always
+    # runs would fail every release until somebody ticked that box.
+    if: startsWith(github.ref, 'refs/tags/') && vars.DEPLOY_PAGES == 'true'
     permissions:
       contents: read
       pages: write
@@ -151,8 +161,6 @@ jobs:
       # configured. Without it the action fails with a bare "Not Found", which
       # is an unhelpful way to say "tick a box in Settings".
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
