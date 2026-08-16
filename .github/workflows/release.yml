@@ -49,9 +49,11 @@ jobs:
 
       - run: pnpm run format:check
       - run: pnpm run lint
+      # Build before typechecking: consumers resolve @unmarkk/core through its
+      # declaration files, which do not exist until it has been built.
+      - run: pnpm run build
       - run: pnpm run typecheck
       - run: pnpm test
-      - run: pnpm run build
 
       # The privacy claim is structural, so it gates the release too.
       - name: Engine still has no dependencies or I/O

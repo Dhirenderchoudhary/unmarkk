@@ -26,7 +26,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run build && pnpm run typecheck && pnpm run test",
     "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo coverage",
     "rename": "node scripts/rename-scope.mjs",
     "version:set": "node scripts/set-version.mjs",

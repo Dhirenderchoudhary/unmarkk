@@ -40,14 +40,17 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
+      # Build first: the CLI, server and web packages consume @unmarkk/core
+      # through its published entry points, so its declaration files have to
+      # exist before anything that imports it can be typechecked or bundled.
+      - name: Build
+        run: pnpm run build
+
       - name: Types
         run: pnpm run typecheck
 
       - name: Tests
         run: pnpm test
-
-      - name: Build
-        run: pnpm run build
 
   no-egress:
     name: engine has no network capability
@@ -85,6 +88,7 @@ jobs:
 
       - name: Web bundle contains no network API
         run: |
+          pnpm --filter @unmarkk/core build
           pnpm --filter @unmarkk/web build
           if grep -rnE "fetch\(|XMLHttpRequest|WebSocket|sendBeacon|EventSource" packages/web/dist/assets/*.js; then
             echo "::error::the web bundle gained a network API"
