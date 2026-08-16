@@ -34,15 +34,15 @@
     "release:dry": "pnpm publish -r --dry-run --access public --filter '!@unmarkk/web'"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^2.1.8",
-    "eslint": "^9.17.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.8.1",
     "prettier": "^3.4.2",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.18.1",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",

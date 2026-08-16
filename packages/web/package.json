@@ -16,7 +16,7 @@
     "@unmarkk/core": "workspace:*"
   },
   "devDependencies": {
-    "vite": "^5.4.11"
+    "vite": "^8.2.1"
   },
   "repository": {
     "type": "git",
