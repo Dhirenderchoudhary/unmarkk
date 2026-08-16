@@ -1,6 +1,6 @@
 {
   "name": "@unmarkk/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Privacy-first watermark and metadata removal engine. Zero dependencies, runs in Node and the browser.",
   "license": "MIT",
   "author": "Dhirender Choudhary",
@@ -18,6 +18,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "!dist/**/*.tsbuildinfo",
     "!dist/.tsbuildinfo",
     "README.md"

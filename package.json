@@ -1,6 +1,6 @@
 {
   "name": "unmark-monorepo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Privacy-first watermark and metadata remover. Everything runs locally.",
   "license": "MIT",
