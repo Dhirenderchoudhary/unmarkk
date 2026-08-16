@@ -1,9 +1,9 @@
 # Container for the local HTTP API.
 #
 # Deliberately minimal: the engine has no dependencies and needs no system
-# tools, so the runtime layer is Node and four JavaScript files. There is no
-# exiftool, no qpdf, no Python — nothing to keep patched and nothing extra with
-# access to the documents that pass through.
+# tools, so the runtime layer is Node and four JavaScript files. Nothing else
+# is installed: nothing extra to keep patched, and nothing with access to the
+# documents that pass through.
 
 FROM node:22-alpine AS build
 WORKDIR /app
