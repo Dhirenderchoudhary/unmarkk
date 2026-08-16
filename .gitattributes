@@ -1,0 +1,35 @@
+# Normalise line endings.
+#
+# Git on Windows checks out CRLF by default. Prettier expects LF, so without
+# this every formatting check fails on Windows while passing everywhere else —
+# and a contributor on Windows ends up committing whole files as "changed"
+# because their editor rewrote the endings.
+#
+# `eol=lf` pins the working copy to LF on every platform, which is what the
+# toolchain, the tests and the byte-level fixtures all assume.
+* text=auto eol=lf
+
+# Fixtures and binaries must never be touched by end-of-line conversion. This
+# project builds files byte by byte and asserts on exact bytes; a single
+# rewritten newline would silently change what is under test.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.pdf binary
+*.docx binary
+*.odt binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ico binary
+
+# Generated, and noisy in review.
+pnpm-lock.yaml linguist-generated=true -diff
+
+# Keep the language stats honest: docs and config should not drown out the code.
+docs/** linguist-documentation=true
+skills/** linguist-documentation=true
+integrations/** linguist-documentation=true
