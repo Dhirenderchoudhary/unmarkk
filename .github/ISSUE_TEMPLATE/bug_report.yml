@@ -1,0 +1,63 @@
+name: Bug report
+description: Something behaved differently from how it is documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: if a **clean succeeded but the metadata is still recoverable**,
+        please treat it as a security issue and follow [SECURITY.md](../blob/main/SECURITY.md)
+        instead of opening a public report.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, and what the output was.
+      placeholder: |
+        $ unmark clean report.pdf
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: A file that reproduces it
+      description: |
+        The single most useful thing you can attach. Strip anything sensitive from
+        it first — which is a use this project supports. If you cannot share the
+        file, `unmark inspect <file> --json` output is the next best thing.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 'unmark --version'
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Node version and OS
+      placeholder: 'Node 22.11 on macOS 15'
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked [the documented limits](../blob/main/README.md#limits) and this is not one of them
+          required: true
+        - label: I am on the current release
+          required: true

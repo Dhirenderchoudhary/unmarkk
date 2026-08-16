@@ -1,0 +1,37 @@
+name: Format support
+description: Ask for a file format to be inspected and cleaned.
+labels: [format]
+body:
+  - type: input
+    id: format
+    attributes:
+      label: Format
+      placeholder: 'TIFF, HEIC, EPUB, …'
+    validations:
+      required: true
+
+  - type: textarea
+    id: metadata
+    attributes:
+      label: What metadata does it carry
+      description: |
+        Which structures hold identifying data or provenance claims, and roughly
+        where they live in the file. A pointer to the specification helps a lot.
+    validations:
+      required: true
+
+  - type: textarea
+    id: keep
+    attributes:
+      label: What must not be removed
+      description: |
+        The rule this project follows is "remove what describes the file, keep what
+        renders it". Which parts of this format are load-bearing for rendering?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use
+    attributes:
+      label: Why it matters
+      description: What are you trying to protect, and from whom?

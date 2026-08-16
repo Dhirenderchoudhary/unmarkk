@@ -1,0 +1,145 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Pack and validate without publishing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Read the version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Tagging v1.0.1 and shipping 1.0.0 is the classic release mistake, and
+      # npm versions cannot be replaced. Catch it before anything is published.
+      - name: Tag must match package.json
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          pkg="${{ steps.version.outputs.version }}"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag v$tag does not match package.json version $pkg"
+            exit 1
+          fi
+
+      - run: pnpm run format:check
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm test
+      - run: pnpm run build
+
+      # The privacy claim is structural, so it gates the release too.
+      - name: Engine still has no dependencies or I/O
+        run: |
+          deps=$(node -p "Object.keys(require('./packages/core/package.json').dependencies ?? {}).length")
+          [ "$deps" = "0" ] || { echo "::error::@unmarkk/core gained runtime dependencies"; exit 1; }
+          ! grep -rqE "from '(node:|fs|path|http|https|net|child_process)" packages/core/src \
+            || { echo "::error::@unmarkk/core imports a Node built-in"; exit 1; }
+          ! grep -rqE "\b(fetch|XMLHttpRequest|WebSocket|sendBeacon)\s*\(" packages/core/src \
+            || { echo "::error::@unmarkk/core contains a network call"; exit 1; }
+
+      - name: Inspect the tarballs
+        run: |
+          for p in core cli server; do
+            echo "--- @unmarkk/$p ---"
+            (cd "packages/$p" && npm pack --dry-run)
+          done
+
+  publish:
+    name: publish to npm
+    needs: verify
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && inputs.dry_run != true
+    environment: release
+    permissions:
+      contents: read
+      # Required for npm provenance: it signs the published tarball against
+      # this workflow run, so anyone can verify what commit produced it with
+      # `npm audit signatures`.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+      # Order matters: cli and server depend on core, so core must be on the
+      # registry first. pnpm resolves that itself with a recursive publish, and
+      # rewrites the workspace:* ranges to real versions on the way out.
+      - name: Publish
+        run: pnpm publish -r --access public --no-git-checks --filter '!@unmarkk/web'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+  pages:
+    name: deploy the web app
+    needs: verify
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @unmarkk/core build
+      - run: pnpm --filter @unmarkk/web build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/web/dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

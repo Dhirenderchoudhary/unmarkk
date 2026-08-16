@@ -1,0 +1,19 @@
+services:
+  unmark:
+    build: .
+    # Published on loopback only. Anything sent to this service is a document
+    # somebody did not intend to publish; change this to 0.0.0.0 only if you
+    # have also set UNMARK_API_KEY and put TLS in front of it.
+    ports:
+      - '127.0.0.1:8765:8765'
+    environment:
+      # UNMARK_API_KEY: change-me
+      UNMARK_LOG_REQUESTS: '1'
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

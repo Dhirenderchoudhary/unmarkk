@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [20, 22, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Formatting
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Types
+        run: pnpm run typecheck
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm run build
+
+  no-egress:
+    name: engine has no network capability
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The privacy claim in the README is structural, so it is worth failing
+      # the build over. The engine must have no dependencies and no way to
+      # perform I/O, and the web bundle must contain no network API at all.
+      - name: Core has no runtime dependencies
+        run: |
+          deps=$(node -p "Object.keys(require('./packages/core/package.json').dependencies ?? {}).length")
+          if [ "$deps" != "0" ]; then
+            echo "::error::@unmarkk/core gained $deps runtime dependencies"
+            exit 1
+          fi
+
+      - name: Core imports nothing that can do I/O
+        run: |
+          if grep -rnE "from '(node:|fs|path|http|https|net|child_process)" packages/core/src; then
+            echo "::error::@unmarkk/core must not import Node built-ins"
+            exit 1
+          fi
+          if grep -rnE "\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|EventSource)\s*\(" packages/core/src; then
+            echo "::error::@unmarkk/core must not contain network calls"
+            exit 1
+          fi
+
+      - name: Web bundle contains no network API
+        run: |
+          pnpm --filter @unmarkk/web build
+          if grep -rnE "fetch\(|XMLHttpRequest|WebSocket|sendBeacon|EventSource" packages/web/dist/assets/*.js; then
+            echo "::error::the web bundle gained a network API"
+            exit 1
+          fi
+
+      - name: Web page still declares connect-src 'none'
+        run: grep -q "connect-src 'none'" packages/web/dist/index.html

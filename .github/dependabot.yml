@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Dev tooling only — the engine has no runtime dependencies, and that is a
+  # property CI enforces rather than a coincidence.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

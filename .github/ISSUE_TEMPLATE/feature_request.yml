@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a change to how the tool behaves.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that is awkward or impossible today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried
+      description: Existing options, other tools, workarounds.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      description: |
+        Some things are permanently out of scope — see
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#scope).
+      options:
+        - label: This does not require a network call, a native binary, or a runtime dependency in the engine
+          required: true
