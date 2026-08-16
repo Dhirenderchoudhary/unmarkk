@@ -44,5 +44,8 @@
   "homepage": "https://github.com/Dhirenderchoudhary/unmarkk#readme",
   "bugs": {
     "url": "https://github.com/Dhirenderchoudhary/unmarkk/issues"
+  },
+  "engines": {
+    "node": ">=20.11"
   }
 }
