@@ -1,0 +1,53 @@
+{
+  "name": "@unmarkk/server",
+  "version": "1.0.0",
+  "description": "Local-first HTTP API for the unmark engine. Binds to loopback, keeps nothing, logs no content.",
+  "license": "MIT",
+  "author": "Dhirender Choudhary",
+  "type": "module",
+  "bin": {
+    "unmark-server": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/.tsbuildinfo",
+    "README.md"
+  ],
+  "keywords": [
+    "privacy",
+    "metadata",
+    "http",
+    "api",
+    "self-hosted",
+    "local-first"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@unmarkk/core": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dhirenderchoudhary/unmarkk.git",
+    "directory": "packages/server"
+  },
+  "homepage": "https://github.com/Dhirenderchoudhary/unmarkk#readme",
+  "bugs": {
+    "url": "https://github.com/Dhirenderchoudhary/unmarkk/issues"
+  }
+}
