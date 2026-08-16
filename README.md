@@ -1,5 +1,11 @@
 # unmark
 
+[![CI](https://github.com/Dhirenderchoudhary/unmarkk/actions/workflows/ci.yml/badge.svg)](https://github.com/Dhirenderchoudhary/unmarkk/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@unmarkk/cli?label=%40unmarkk%2Fcli)](https://www.npmjs.com/package/@unmarkk/cli)
+[![npm](https://img.shields.io/npm/v/@unmarkk/core?label=%40unmarkk%2Fcore)](https://www.npmjs.com/package/@unmarkk/core)
+[![dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2c6a4d)](https://www.npmjs.com/package/@unmarkk/core?activeTab=dependencies)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Privacy-first watermark and metadata remover.** Strips the data your files carry about you — GPS coordinates, camera serial numbers, author names, editing timestamps — along with AI provenance manifests and invisible Unicode carriers.
 
 Everything runs locally. The engine has no network code in it at all.
@@ -68,6 +74,12 @@ npm install @unmarkk/core
 # Local HTTP API
 npm install -g @unmarkk/server
 ```
+
+| Package                                                            |                          |                            |
+| ------------------------------------------------------------------ | ------------------------ | -------------------------- |
+| [`@unmarkk/cli`](https://www.npmjs.com/package/@unmarkk/cli)       | the `unmark` command     | `npm i -g @unmarkk/cli`    |
+| [`@unmarkk/core`](https://www.npmjs.com/package/@unmarkk/core)     | the engine, as a library | `npm i @unmarkk/core`      |
+| [`@unmarkk/server`](https://www.npmjs.com/package/@unmarkk/server) | the local HTTP API       | `npm i -g @unmarkk/server` |
 
 Requires Node 20.11 or newer. No system tools — no `exiftool`, no `qpdf`, no ImageMagick. Every format is parsed directly, which is what lets the same engine run unchanged in a browser.
 
