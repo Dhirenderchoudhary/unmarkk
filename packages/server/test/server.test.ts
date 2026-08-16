@@ -73,6 +73,23 @@ describe('routes', () => {
     expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
   });
 
+  it('answers at / instead of 404ing the URL it just printed', async () => {
+    // The startup banner prints this URL. Returning "not found" here reads as
+    // a broken install to anyone who opens it in a browser.
+    const body = await (await fetch(`${url}/`)).json();
+    expect(body.ok).toBe(true);
+    expect(body.service).toBe('unmark');
+    expect(Object.keys(body.endpoints)).toContain('GET /health');
+  });
+
+  it('serves a readable page to a browser', async () => {
+    const response = await fetch(`${url}/`, { headers: { Accept: 'text/html' } });
+    expect(response.headers.get('content-type')).toContain('text/html');
+    const html = await response.text();
+    expect(html).toContain('running');
+    expect(html).toContain('/health');
+  });
+
   it('404s an unknown path', async () => {
     const response = await fetch(`${url}/nope`);
     expect(response.status).toBe(404);

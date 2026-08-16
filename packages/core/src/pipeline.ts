@@ -149,7 +149,18 @@ export function summarise(report: InspectReport, stylometryThreshold = DEFAULT_T
     report.privacy.hasDeviceIdentity ||
     report.privacy.hasAuthorIdentity ||
     report.privacy.hasTimestamps;
-  const flagged = report.hasC2pa || report.hasAiMetadata || privacyFlagged;
+
+  // Anything a parser actually confirmed counts, whether or not it maps to one
+  // of the four privacy categories. Keying the verdict off those categories
+  // alone meant a file could carry a confirmed Exif block full of UserComment
+  // and Adobe XMP and still be summarised as "clean" — the tag names simply
+  // were not in a category list. A false clean is the worst outcome this tool
+  // can produce, because the user then publishes the file.
+  const substantiated = report.findings.filter(
+    (f) => f.confidence === 'confirmed' || f.confidence === 'probable',
+  );
+  const flagged =
+    report.hasC2pa || report.hasAiMetadata || privacyFlagged || substantiated.length > 0;
 
   const parts: string[] = [];
   if (report.hasC2pa) parts.push('C2PA manifest');
@@ -158,6 +169,12 @@ export function summarise(report: InspectReport, stylometryThreshold = DEFAULT_T
   if (report.privacy.hasDeviceIdentity) parts.push('device identity');
   if (report.privacy.hasAuthorIdentity) parts.push('author identity');
   if (report.privacy.hasTimestamps) parts.push('timestamps');
+
+  // Findings the categories did not describe still need saying out loud.
+  if (parts.length === 0 && substantiated.length > 0) {
+    const n = substantiated.length;
+    parts.push(`${n} metadata block${n === 1 ? '' : 's'} carrying unclassified content`);
+  }
 
   return {
     flagged,

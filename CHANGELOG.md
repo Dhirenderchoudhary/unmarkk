@@ -2,6 +2,26 @@
 
 Notable changes, newest first. This project follows [semantic versioning](https://semver.org).
 
+## 1.0.4
+
+### Fixed
+
+- **`inspect` no longer reports "clean" while listing confirmed findings.** The
+  verdict was computed only from the four privacy categories — location, device,
+  author, timestamps — so a file whose metadata did not map to one of them was
+  summarised as clean even as the report printed a confirmed finding directly
+  underneath. A real macOS screenshot does exactly this: its Exif block holds
+  `ExifIFDPointer` and `UserComment` and nothing else. Any substantiated finding
+  now flags the file. A false clean is the worst output this tool can produce,
+  because the user then publishes the file.
+
+### Added
+
+- **The server answers at `/`.** It prints its own URL on startup, and opening
+  that URL returned `{"ok":false,"error":"not found"}`, which reads as a broken
+  install rather than a working API with no route at the root. It now returns a
+  readable page in a browser and a JSON endpoint index everywhere else.
+
 ## 1.0.3
 
 ### Changed

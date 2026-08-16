@@ -118,6 +118,39 @@ describe('summarise', () => {
     expect(verdict.summary).toContain('location');
   });
 
+  it('flags a confirmed finding even when it fits no privacy category', async () => {
+    // A real macOS screenshot carries an eXIf block holding only
+    // ExifIFDPointer and UserComment. Neither is location, device, author or
+    // timestamp, so a verdict keyed solely off those categories called the
+    // file clean while printing a confirmed finding directly underneath it.
+    // A false clean is the worst thing this tool can output.
+    const png = makePng([{ type: 'eXIf', payload: makeExif([{ tag: 0x8769 }, { tag: 0x9286 }]) }]);
+    const report = await inspect(png, { filename: 'shot.png' });
+    const verdict = summarise(report);
+
+    expect(report.findings.some((f) => f.confidence === 'confirmed')).toBe(true);
+    expect(verdict.flagged).toBe(true);
+    expect(verdict.summary).not.toBe('no metadata found');
+  });
+
+  it('never says "no metadata found" while listing a substantiated finding', async () => {
+    for (const png of [
+      makePng([{ type: 'eXIf', payload: makeExif([{ tag: 0x9286 }]) }]),
+      makePng([{ type: 'tIME', payload: Uint8Array.of(7, 0xea, 1, 5, 9, 12, 0) }]),
+      makePng([{ type: 'eXIf', payload: makeExif([{ tag: 0x8769 }]) }]),
+    ]) {
+      const report = await inspect(png, { filename: 'x.png' });
+      const verdict = summarise(report);
+      const substantiated = report.findings.filter(
+        (f) => f.confidence === 'confirmed' || f.confidence === 'probable',
+      );
+      if (substantiated.length > 0) {
+        expect(verdict.flagged, verdict.summary).toBe(true);
+        expect(verdict.summary).not.toBe('no metadata found');
+      }
+    }
+  });
+
   it('names the strongest confidence it saw', async () => {
     const jpeg = makeJpeg([
       { marker: 0xe1, payload: app1Exif(makeExif([{ tag: EXIF_TAG.Make }])) },

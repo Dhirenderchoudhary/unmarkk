@@ -242,6 +242,71 @@ function corsHeaders(config: ServerConfig, origin: string | undefined): Record<s
 }
 
 /** Constant-time bearer token comparison. */
+/**
+ * The index page.
+ *
+ * The startup banner prints this URL, so the first thing most people do is open
+ * it — and a bare `{"ok":false,"error":"not found"}` reads as a broken install
+ * rather than a working service that simply has no route at `/`. This answers
+ * "what is this, and what can I call?" in whichever form the client asked for.
+ */
+function sendIndex(
+  request: IncomingMessage,
+  response: ServerResponse,
+  config: ServerConfig,
+  origin: string | undefined,
+): void {
+  const endpoints = {
+    'GET /health': 'liveness and version',
+    'GET /capabilities': 'which formats this build handles',
+    'GET /openapi.json': 'the full API description',
+    'POST /inspect': 'report what a file carries; changes nothing',
+    'POST /clean': 'return a cleaned copy and a record of what was removed',
+  };
+
+  if (!(request.headers.accept ?? '').includes('text/html')) {
+    send(
+      response,
+      200,
+      { ok: true, service: 'unmark', version: VERSION, endpoints },
+      config,
+      origin,
+    );
+    return;
+  }
+
+  const rows = Object.entries(endpoints)
+    .map(([route, what]) => `<tr><td><code>${route}</code></td><td>${what}</td></tr>`)
+    .join('');
+  const html = `<!doctype html><meta charset="utf-8"><title>unmark ${VERSION}</title>
+<style>
+ body{font:15px/1.6 system-ui,sans-serif;max-width:44rem;margin:3rem auto;padding:0 1.25rem;
+      background:#16161a;color:#eceaf0}
+ h1{font-size:1.3rem;margin:0 0 .25rem}p{color:#9b98a4;margin:.25rem 0 1.5rem}
+ table{border-collapse:collapse;width:100%}td{padding:.45rem .6rem;border-top:1px solid #33333c}
+ code{font-family:ui-monospace,Menlo,monospace;font-size:.86em;color:#6cbb92}
+ .ok{color:#6cbb92;font-weight:600}
+</style>
+<h1>unmark <span class="ok">running</span></h1>
+<p>Version ${VERSION}. Files are processed in memory and never written to disk.</p>
+<table>${rows}</table>
+<p style="margin-top:1.5rem">There is no page here beyond this one — it is an API.
+Try <code>GET /health</code>.</p>`;
+
+  const body = Buffer.from(html, 'utf8');
+  response.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Content-Length': String(body.length),
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'Content-Security-Policy':
+      "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",
+    ...corsHeaders(config, origin),
+  });
+  response.end(body);
+}
+
 function authorised(request: IncomingMessage, config: ServerConfig): boolean {
   if (config.apiKey === undefined) return true;
   const header = request.headers.authorization ?? '';
@@ -316,6 +381,10 @@ async function handle(
   }
 
   if (request.method === 'GET') {
+    if (path === '/') {
+      sendIndex(request, response, config, origin);
+      return;
+    }
     if (path === '/health') {
       send(response, 200, { ok: true, version: VERSION }, config, origin);
       return;
