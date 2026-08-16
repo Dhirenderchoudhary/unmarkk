@@ -1,0 +1,30 @@
+{
+  "name": "@unmarkk/web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser front end for unmark. Every byte is processed locally; the page has no network access.",
+  "license": "MIT",
+  "author": "Dhirender Choudhary",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@unmarkk/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dhirenderchoudhary/unmarkk.git",
+    "directory": "packages/web"
+  },
+  "homepage": "https://github.com/Dhirenderchoudhary/unmarkk#readme",
+  "bugs": {
+    "url": "https://github.com/Dhirenderchoudhary/unmarkk/issues"
+  }
+}

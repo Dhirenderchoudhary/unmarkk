@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>unmark — privacy-first watermark and metadata remover</title>
+    <meta
+      name="description"
+      content="Strip metadata and watermarks from images and documents. Everything runs in your browser; nothing is uploaded."
+    />
+    <meta property="og:title" content="unmark — privacy-first watermark and metadata remover" />
+    <meta
+      property="og:description"
+      content="Strip GPS coordinates, camera serial numbers, author names, AI provenance, and invisible Unicode carriers from your files. Everything runs locally."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="unmark" />
+    <meta
+      name="twitter:description"
+      content="Privacy-first metadata and watermark remover. Runs entirely in your browser."
+    />
+    <meta name="theme-color" content="#0c0c0f" />
+
+    <!--
+      This policy is the whole point of the page.
+
+      `connect-src 'none'` means the browser will refuse every fetch, XHR,
+      WebSocket and beacon this page tries to make. Not "we promise not to
+      upload your files" — the browser will not let us, and you can confirm it
+      by watching the Network tab while you drop a file in.
+
+      `form-action 'none'` closes the other obvious exfiltration route.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self';
+               style-src 'self' 'unsafe-inline';
+               img-src 'self' blob: data:;
+               font-src 'self';
+               connect-src 'none';
+               worker-src 'self' blob:;
+               form-action 'none';
+               frame-ancestors 'none';
+               base-uri 'none';
+               object-src 'none'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%94%92%3C/text%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>
+      <p style="padding: 2rem; font-family: system-ui">
+        unmark processes files locally using JavaScript in your browser, so it needs JavaScript
+        enabled. If you would rather not run it, the command-line tool does the same work offline.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
