@@ -29,7 +29,6 @@ import {
   listRewriteOptions,
   runRewrite,
 } from './commands/rewrite.js';
-import { runBackends } from './commands/backends.js';
 
 const HELP = `${style.bold('unmark')} — privacy-first watermark and metadata remover
 
@@ -42,7 +41,6 @@ ${style.bold('COMMANDS')}
   scan    <dir...>      Audit a directory tree and rank what needs attention.
   audit-site <url>      Audit a live site from its sitemap. Makes network requests.
   rewrite <path>        Layer B: rephrase prose to disturb a sampling watermark.
-  backends              Show which optional heavy backends are installed.
 
 ${style.bold('COMMON OPTIONS')}
   --json                Machine-readable output on stdout.
@@ -83,7 +81,7 @@ ${style.bold('AUDIT-SITE')}
   --quiet, --stylometry, --json
 
 ${style.bold('REWRITE')}
-  --list                Show the available modes and backends.
+  --list                Show the available rewrite modes and model backends.
   --mode <name>         paraphrase (default), humanize, code, outline, expand,
                         backtranslate-out, backtranslate-back.
   --backend <name>      print-prompt (default), ollama, openai-compatible.
@@ -171,7 +169,6 @@ async function main(argv: readonly string[]): Promise<number> {
       language: { type: 'string' },
       'allow-remote': { type: 'boolean', default: false },
       'no-clean-passes': { type: 'boolean', default: false },
-      setup: { type: 'boolean', default: false },
     },
   });
 
@@ -265,9 +262,6 @@ async function main(argv: readonly string[]): Promise<number> {
         ...(values.output === undefined ? {} : { output: values.output }),
       });
     }
-
-    case 'backends':
-      return runBackends({ json: values.json === true, setup: values.setup === true });
 
     default:
       throw new CliError(`unknown command "${command}". Run \`unmark --help\`.`);

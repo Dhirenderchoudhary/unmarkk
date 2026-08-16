@@ -47,14 +47,13 @@ support that.
 A mark embedded in the image data itself — not in a metadata block — survives
 metadata removal completely, because metadata removal does not touch pixels.
 
-Removing one requires regenerating the image through a diffusion model. That is
-what the optional CtrlRegen and MarkDiffusion backends do, and it is worth being
-clear about the trade: the output is a **different image**. Fine detail moves.
-For photographs of people, that can matter more than the watermark did.
+Removing one requires regenerating the image, and the trade is worth being clear
+about: the output is a **different image**. Fine detail moves. For photographs
+of people, that can matter more than the watermark did.
 
-`unmark backends` reports whether either is installed. Neither ships with the
-tool, both need multi-gigabyte model weights, and for the overwhelming majority
-of privacy work neither is what someone actually needs.
+That is a different tool with different trade-offs, and it is out of scope here.
+For the overwhelming majority of privacy work it is not what anyone needs
+anyway — the metadata is the leak.
 
 ## Encrypted PDFs are refused
 

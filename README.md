@@ -79,7 +79,6 @@ unmark clean   <path...>     # write a cleaned copy
 unmark scan    <dir...>      # audit a directory tree, ranked worst-first
 unmark audit-site <url>      # audit a live site from its sitemap
 unmark rewrite <path>        # Layer B: rephrase prose to disturb a sampling watermark
-unmark backends              # which optional heavy backends are installed
 ```
 
 ```bash

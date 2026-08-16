@@ -35,8 +35,8 @@ Zero dependencies, no I/O capability, the same code in Node and the browser.
 
 ### The command line — `@unmarkk/cli`
 
-`inspect`, `clean`, `scan`, `audit-site`, `rewrite` and `backends`, with atomic
-symlink-safe writes and pipeline-friendly exit codes.
+`inspect`, `clean`, `scan`, `audit-site` and `rewrite`, with atomic symlink-safe
+writes and pipeline-friendly exit codes.
 
 - `scan` ranks a directory tree worst-first and reports exposure categories
   rather than only counts.
@@ -48,8 +48,6 @@ symlink-safe writes and pipeline-friendly exit codes.
   are loopback-only unless explicitly overridden, API keys come from the
   environment rather than argv, and redirects are refused so an `Authorization`
   header cannot be forwarded to an unvalidated host.
-- `backends` reports which optional external engines are actually installed and
-  usable, rather than what is theoretically supported.
 
 ### The service — `@unmarkk/server`
 
@@ -98,5 +96,5 @@ shipping scripts that drift out of step with it.
 
 Pixel-domain and audio watermark removal, and statistical text watermark
 removal. Neither can be done by editing bytes, and both are documented as limits
-rather than gestured at. Optional external backends exist for the pixel case;
-none ship with the tool.
+rather than gestured at. Removing a pixel watermark means regenerating and
+degrading the image, which is a different tool with different trade-offs.

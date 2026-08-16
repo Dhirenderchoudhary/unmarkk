@@ -92,10 +92,9 @@ The only thing that disturbs it is rewriting the prose — see the `unmark-text`
 skill, and be honest that the result cannot be verified.
 
 **Pixel-domain and audio watermarks.** Marks embedded in the image data itself
-survive metadata removal completely. Removing them means regenerating the image
-through a diffusion model, which changes it. `unmark backends` reports whether
-such a backend is installed; it is not, by default, and it is rarely what
-someone actually wants.
+survive metadata removal completely. Removing one would mean regenerating the
+image and degrading it, which is a different tool with different trade-offs and
+is out of scope here.
 
 Never tell a user their file is "clean" in a way that implies either of these
 was handled.
