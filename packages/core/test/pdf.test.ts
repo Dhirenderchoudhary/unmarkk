@@ -147,6 +147,19 @@ describe('cleanPdf', () => {
     expect(raw(twice)).toContain('Hello world');
   });
 
+  it('converges: cleaning a cleaned file changes nothing', async () => {
+    // The parser captures the newline that follows `N G obj`, so re-emitting
+    // it with a leading newline grew the file by one byte per object on every
+    // pass. Byte equality is the only assertion that catches that.
+    const once = (await cleanPdf(makePdf())).output;
+    const twice = (await cleanPdf(once)).output;
+    const thrice = (await cleanPdf(twice)).output;
+
+    expect(twice.length).toBe(once.length);
+    expect(twice).toEqual(once);
+    expect(thrice).toEqual(once);
+  });
+
   it('refuses an encrypted document rather than mangling it', async () => {
     const encrypted = encodeText(
       raw(makePdf()).replace('/Root 1 0 R', '/Encrypt 9 0 R /Root 1 0 R'),

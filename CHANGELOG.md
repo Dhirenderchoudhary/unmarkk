@@ -2,6 +2,34 @@
 
 Notable changes, newest first. This project follows [semantic versioning](https://semver.org).
 
+## 1.0.2
+
+### Fixed
+
+- **PDF cleaning now converges.** The parser captures everything after
+  `N G obj`, including the newline that follows it, so re-emitting each object
+  with a leading newline reintroduced one every pass. A cleaned PDF grew by a
+  byte per object each time it was cleaned again and never reached a fixed
+  point. Found by verifying byte equality across repeated passes rather than
+  only checking that the metadata was gone.
+
+## 1.0.1
+
+### Fixed
+
+- **PNG text-chunk keywords are read correctly.** `tEXt`, `zTXt` and `iTXt`
+  store `keyword\0value`; the keyword was being split on whitespace after the
+  NUL had already been replaced, so a chunk written as `Author\0Jane Smith`
+  was reported with the keyword `author.jane smith` — wrong, and it spilled the
+  value into the field meant to name the field.
+
+### Added
+
+- `repository`, `homepage` and `bugs` metadata on every package, so the npm
+  pages link back to the source.
+- An `engines` range on the engine package: it uses `CompressionStream` and
+  `DecompressionStream` as globals, which arrive in Node 20.11.
+
 ## 1.0.0
 
 First release.

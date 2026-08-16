@@ -529,7 +529,11 @@ function serialise(
     const obj = objects.get(number)!;
     offsets.set(number, offset);
 
-    const dict = obj.dict.replace(/\s+$/, '');
+    // Trim both ends, not just the tail. The parser captures everything after
+    // `N G obj`, which includes the newline that followed it — so emitting
+    // `obj\n${dict}` reintroduced that newline every time. Cleaning the same
+    // file twice grew it by one byte per object and never converged.
+    const dict = obj.dict.trim();
     if (obj.stream === undefined) {
       push(fromLatin1(`${number} 0 obj\n${dict}\nendobj\n`));
     } else {

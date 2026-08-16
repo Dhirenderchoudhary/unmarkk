@@ -1,6 +1,6 @@
 {
   "name": "@unmarkk/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command-line privacy-first watermark and metadata remover. Runs entirely on your machine.",
   "license": "MIT",
   "author": "Dhirender Choudhary",
