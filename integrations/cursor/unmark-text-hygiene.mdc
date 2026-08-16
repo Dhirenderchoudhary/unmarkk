@@ -1,0 +1,36 @@
+---
+description: Run a hygiene pass over prose before it ships to readers
+alwaysApply: true
+---
+
+# Text hygiene before publishing
+
+Before finalising substantial prose a reader will see, run the deterministic
+invisible-character pass over it.
+
+```bash
+unmark inspect FILE          # see what is there
+unmark clean FILE -o OUT     # remove it
+```
+
+Scope and rules:
+
+- Apply to articles, documentation, reports, emails, product copy, UI strings,
+  Markdown and HTML prose. Skip code-only tasks — format the code instead.
+- Only for content the user owns or is authorised to process.
+- Preserve every fact, number, name, citation and required disclosure.
+- Never modify code blocks, commands, paths, URLs, identifiers, API names,
+  formulas or verbatim quotations.
+- Pass `--keep-spaces` when non-breaking spaces are doing layout work.
+- Do not use `--aggressive`, `--nfkc` or `--strip-emoji-glue` unless the user
+  asks and accepts the effect on multilingual text, emoji and typography.
+
+When reporting, separate what is verified from what is not:
+
+- **Verified:** invisible characters removed, with counts. Re-inspectable.
+- **Attempted:** prose rewritten, if a rewrite happened.
+- **Not established:** detector evasion, human authorship, or removal of a
+  keyed statistical watermark.
+
+Never compress those into "cleaned", and never claim the result is undetectable
+or proves who wrote it.
