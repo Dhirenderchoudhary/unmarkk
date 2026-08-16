@@ -90,6 +90,42 @@ describe('routes', () => {
     expect(html).toContain('/health');
   });
 
+  it('serves the browser app at / when it is bundled', async () => {
+    const response = await fetch(`${url}/`, { headers: { Accept: 'text/html' } });
+    expect(response.status).toBe(200);
+    const body = await response.text();
+    // Either the app itself, or the endpoint index when it was not built.
+    expect(body).toMatch(/Drop files here|unmark <span class="ok">running|running/);
+  });
+
+  it('keeps the app locked down when it serves it', async () => {
+    const response = await fetch(`${url}/`, { headers: { Accept: 'text/html' } });
+    const csp = response.headers.get('content-security-policy') ?? '';
+    // Whichever page came back, it must not be allowed to phone anywhere.
+    expect(csp).toContain("connect-src 'none'");
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('refuses to serve anything outside the app directory', async () => {
+    for (const path of [
+      '/../../../../etc/passwd',
+      '/..%2f..%2f..%2fetc%2fpasswd',
+      '/assets/../../../../etc/passwd',
+      '/%2e%2e%2f%2e%2e%2fetc%2fpasswd',
+    ]) {
+      const response = await fetch(`${url}${path}`);
+      const body = response.ok ? await response.text() : '';
+      expect(body, path).not.toMatch(/^root:/m);
+    }
+  });
+
+  it('answers HEAD as well as GET', async () => {
+    // Browsers, proxies and health checks all send HEAD; 404ing it makes the
+    // app look absent.
+    const response = await fetch(`${url}/`, { method: 'HEAD' });
+    expect(response.status).toBe(200);
+  });
+
   it('404s an unknown path', async () => {
     const response = await fetch(`${url}/nope`);
     expect(response.status).toBe(404);

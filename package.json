@@ -1,6 +1,6 @@
 {
   "name": "unmark-monorepo",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "Privacy-first watermark and metadata remover. Everything runs locally.",
   "license": "MIT",
@@ -16,7 +16,7 @@
     ]
   },
   "scripts": {
-    "build": "pnpm -r --filter \"./packages/**\" build",
+    "build": "pnpm --filter @unmarkk/core build && pnpm --filter @unmarkk/web build && pnpm -r --filter \"./packages/**\" build",
     "dev": "pnpm --filter @unmarkk/web dev",
     "test": "vitest run",
     "test:watch": "vitest",

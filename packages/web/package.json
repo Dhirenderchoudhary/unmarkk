@@ -1,6 +1,6 @@
 {
   "name": "@unmarkk/web",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "Browser front end for unmark. Every byte is processed locally; the page has no network access.",
   "license": "MIT",

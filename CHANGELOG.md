@@ -2,6 +2,30 @@
 
 Notable changes, newest first. This project follows [semantic versioning](https://semver.org).
 
+## 1.0.5
+
+### Added
+
+- **`unmark-server` now serves the browser app.** Running it and opening the
+  URL it prints gives you the actual tool — drag a file in, read the report,
+  download the cleaned copy — instead of a list of endpoints. One command, no
+  checkout and no build step:
+
+  ```
+  npx @unmarkk/server      # then open http://127.0.0.1:8765
+  ```
+
+  This does not weaken anything. The page still carries `connect-src 'none'`,
+  sent as a header as well as a meta tag, so once the browser has it it cannot
+  call anything — including back to the server it came from. Delivery over
+  loopback and processing in the tab are separate concerns.
+
+  API routes are matched first and always win, so `curl /` still returns the
+  endpoint index and every existing client keeps working.
+
+- **`HEAD` is answered like `GET`.** Browsers, proxies and health checks send
+  it, and returning 404 made the app look absent.
+
 ## 1.0.4
 
 ### Fixed

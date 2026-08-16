@@ -3,10 +3,15 @@
 A local HTTP API for the [unmark](../../README.md) engine, for when something other than a terminal needs to strip metadata.
 
 ```bash
-npm install -g @unmarkk/server
-unmark-server
-# unmark 1.0.0 listening on http://127.0.0.1:8765
+npx @unmarkk/server
+# unmark listening on http://127.0.0.1:8765
 ```
+
+Open that URL and you get the browser app: drag a file in, read what it
+carries, download a cleaned copy. Nothing is uploaded — the page is delivered
+over loopback and then does all its work in the tab, under a
+`connect-src 'none'` policy that stops it calling anywhere, including back
+here.
 
 ```bash
 curl -X POST localhost:8765/inspect \

@@ -30,6 +30,7 @@ import {
 } from '@unmarkk/core';
 import { isPubliclyBound, resolveConfig, type ServerConfig } from './config.js';
 import { openApiDocument } from './openapi.js';
+import { appAvailable, serveApp } from './static.js';
 
 const CLEAN_OPTION_KEYS = new Set([
   'nfkc',
@@ -245,10 +246,10 @@ function corsHeaders(config: ServerConfig, origin: string | undefined): Record<s
 /**
  * The index page.
  *
- * The startup banner prints this URL, so the first thing most people do is open
- * it — and a bare `{"ok":false,"error":"not found"}` reads as a broken install
- * rather than a working service that simply has no route at `/`. This answers
- * "what is this, and what can I call?" in whichever form the client asked for.
+ * Shown to non-browser clients, and to browsers when the built app is not
+ * bundled in this install. A bare `{"ok":false,"error":"not found"}` at the
+ * URL the banner prints reads as a broken install rather than a working
+ * service, so this answers "what is this, and what can I call?" instead.
  */
 function sendIndex(
   request: IncomingMessage,
@@ -300,8 +301,11 @@ Try <code>GET /health</code>.</p>`;
     'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
+    // `default-src 'none'` already denies connections; naming connect-src
+    // anyway means both pages this service can return state the guarantee in
+    // the same words, so it is greppable rather than inferred.
     'Content-Security-Policy':
-      "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",
+      "default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; frame-ancestors 'none'",
     ...corsHeaders(config, origin),
   });
   response.end(body);
@@ -380,7 +384,20 @@ async function handle(
     return;
   }
 
-  if (request.method === 'GET') {
+  const isRead = request.method === 'GET' || request.method === 'HEAD';
+
+  if (isRead) {
+    // The browser app is served from everything that is not an API route, so
+    // opening the URL the banner prints gives you the tool rather than a list
+    // of endpoints. API paths are matched first and always win.
+    if (path !== '/health' && path !== '/capabilities' && (await appAvailable())) {
+      const wantsHtml = (request.headers.accept ?? '').includes('text/html');
+      if (path !== '/' || wantsHtml) {
+        const headOnly = request.method === 'HEAD';
+        if (await serveApp(path, response, corsHeaders(config, origin), headOnly)) return;
+      }
+    }
+
     if (path === '/') {
       sendIndex(request, response, config, origin);
       return;
